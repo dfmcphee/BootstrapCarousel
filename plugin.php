@@ -1,25 +1,29 @@
 <?php
 	/*
-	Plugin Name: WPBootstrapCarousel
+	Plugin Name: BootstrapCarousel
 	Plugin URI: http://dominicmcphee.com/wp-bootstrap-carousel
-	Description: WPBootstrapCarousel is a plugin to display WordPress galleries using the Bootstrap Carousel.
+	Description: BootstrapCarousel is a plugin to display WordPress galleries using the Bootstrap Carousel.
 	Version: 0.0.1
 	Author: Dominic McPhee
 	Author URI: Dominic McPhee
 	License: GPL2
 	*/
 	
-	$wp_responsive_slides_height = 500;
-	$wp_responsive_slides_width = 1200;
+	$wp_responsive_slides_height = 700;
+	$wp_responsive_slides_width = 1920;
 	
 	class WPBootstrapCarousel {
 		/**
 		 * Returns markup for carousel
 		 */
-		public static function get_gallery($id){
+		public static function get_gallery($id, $element_id = false){
 			$gallery = '';
 			
 			$gallery_post = get_post($id);
+			
+			if (!$element_id) {
+  			$element_id = 'carousel-' . $id;
+			}
 			
 			if ($gallery_post) {
 				$post_content = $gallery_post->post_content;
@@ -27,7 +31,7 @@
 				preg_match('/\[gallery.*ids=.(.*).\]/', $post_content, $ids);
 				$attachment_ids = explode(",", $ids[1]);
 				
-				$gallery .= '<div id="carousel-' . $id . '" class="carousel slide">';
+				$gallery .= '<div id="' . $element_id . '" class="carousel slide" data-interval="1000" data-cycle="true">';
 				
 				$gallery .= '<ol class="carousel-indicators">';
 
@@ -37,7 +41,7 @@
 					if ($indicator_index === 0) {
 						$class = ' class="active"';
 					}
-					$gallery .= '<li data-target="#carousel-' . $id . '" data-slide-to=slide"';
+					$gallery .= '<li data-target="#' . $element_id . '" data-slide-to="';
 					$gallery .= $indicator_index . '"' . $class . '></li>';
 					$indicator_index++;
 				}
@@ -56,16 +60,20 @@
 					$attachment_info = get_post($attachment_id);
 					$gallery .= '<div class="item' . $class . '">';
 					$gallery .= '<img src="' . $attachment[0] . '" />';
+					
 					if ($attachment_info->post_excerpt) {
-						$post_callout = get_post_meta($attachment_id, 'post_callout_link');
-
+						$post_callout = get_post_meta($attachment_id, 'post_callout_link', true);
+            
+						$excerpt = '<h1>' . $attachment_info->post_title . '</h1>';
+						
+						$excerpt .= '<p>' . $attachment_info->post_excerpt . '</p>';
+						
 						if ($post_callout) {
 							$link = get_permalink($post_callout);
-							$excerpt = '<a href="' . $link . '">' . $attachment_info->post_excerpt . '</a>';
-						} else {
-							$excerpt = $attachment_info->post_excerpt;
+							$excerpt .= '<a class="btn btn-primary" href="' . $link . '">Read More</a></h1>';
 						}
-    					$gallery .= '<div class="carousel-caption">' . $excerpt . '</div>';
+    				
+    				$gallery .= '<div class="container"><div class="carousel-caption">' . $excerpt . '</div></div>';
 					}
 					$gallery .= '</div>';
 					$indicator_index++;
@@ -73,10 +81,10 @@
 				
 				$gallery .= '</div>';
 
-  				$gallery .= '<a class="left carousel-control" href="#carousel-' . $id . '" data-slide="prev">';
+  				$gallery .= '<a class="left carousel-control" href="#' . $element_id . '" data-slide="prev">';
 				$gallery .= '<span class="icon-prev"></span>';
 				$gallery .= '</a>';
-  				$gallery .= '<a class="right carousel-control" href="#carousel-' . $id . '" data-slide="next">';
+  				$gallery .= '<a class="right carousel-control" href="#' . $element_id . '" data-slide="next">';
     			$gallery .= '<span class="icon-next"></span>';
   				$gallery .= '</a>';
 				
